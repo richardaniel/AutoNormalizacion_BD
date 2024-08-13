@@ -1,0 +1,5 @@
+pandas
+pysqlite3
+odfpy
+pyodbc
+pillow
