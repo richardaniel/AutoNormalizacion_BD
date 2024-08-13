@@ -125,6 +125,53 @@ def display_tables(tables, roles_info):
         save_button.pack(side="left")
 
         # Crear Treeview
+        columns = list(table_df.columns)
+        tree = ttk.Treeview(frame, columns=columns, show="headings")
+
+        # Configurar las columnas
+        for col in columns:
+            # Obtener el rol de la columna actual
+            role = roles.get(col, None)
+            header_text = col
+            if role == 'PK':
+                header_text += " (PK)"
+            elif role == 'FK':
+                header_text += " (FK)"
+            
+            tree.heading(col, text=header_text)
+            tree.column(col, width=150, anchor="w")  # Ajuste del ancho de columna
+
+        # Insertar los datos
+        for _, row in table_df.iterrows():
+            tree.insert("", "end", values=list(row))
+
+        tree.pack(fill="both", expand=True)
+
+    # Limpiar el panel derecho
+    clear_right_panel()
+
+    # Agregar un Treeview por cada tabla
+    for idx, (table_df, roles) in enumerate(zip(tables, roles_info)):
+        frame = tk.Frame(right_panel_content)
+        frame.pack(fill="both", expand=True, padx=10, pady=10)
+
+        # Agregar un título para la tabla
+        title_frame = tk.Frame(frame)
+        title_frame.pack(fill="x")
+
+        table_label = tk.Label(title_frame, text=f"Tabla {idx + 1}:", font=("Arial", 14, "bold"))
+        table_label.pack(side="left", pady=(0, 10))
+
+        # Campo de entrada para el nombre de la tabla
+        name_entry = tk.Entry(title_frame)
+        name_entry.insert(0, table_names[idx])  # Valor por defecto
+        name_entry.pack(side="left", padx=10)
+
+        # Botón para guardar el nombre
+        save_button = ttk.Button(title_frame, text="Guardar", command=lambda idx=idx, entry=name_entry: save_table_name(idx, entry))
+        save_button.pack(side="left")
+
+        # Crear Treeview
         tree = ttk.Treeview(frame, columns=list(table_df.columns), show="headings")
 
         # Configurar las columnas

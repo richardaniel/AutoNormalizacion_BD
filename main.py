@@ -20,7 +20,7 @@ def read_excel_tables(filename, sheet_name='Sheet1'):
         table_df = df.iloc[start_row:end_row].reset_index(drop=True)
         if len(table_df) > 1:
             # La primera fila contiene roles (PK, FK, None) y la segunda fila contiene nombres de columnas
-            roles = table_df.iloc[0].dropna().tolist()
+            roles = table_df.iloc[0].tolist()
             column_names = table_df.iloc[1].tolist()
             
             # Solo continuar si la segunda fila tiene nombres de columnas válidos
@@ -32,12 +32,9 @@ def read_excel_tables(filename, sheet_name='Sheet1'):
                 # Elimina las columnas que solo contienen NaN
                 table_df.dropna(axis=1, how='all', inplace=True)
                 
-                # Guarda la información de roles, solo si la primera fila de roles no está vacía
-                if any(pd.notna(role) for role in roles):
-                    column_roles = {col: role for col, role in zip(table_df.columns, roles)}
-                    roles_info.append(column_roles)
-                else:
-                    roles_info.append({})  # Agrega un diccionario vacío para roles si no hay roles definidos
+                # Asignar roles solo a columnas con un rol definido
+                column_roles = {col: role for col, role in zip(table_df.columns, roles) if role and pd.notna(role)}
+                roles_info.append(column_roles)
                 
                 tables.append(table_df)
         
@@ -48,6 +45,7 @@ def read_excel_tables(filename, sheet_name='Sheet1'):
 
 if __name__ == "__main__":
     tables, roles_info = read_excel_tables("formato.xlsx")
+    print(roles_info)
     interface.tables = tables  # Actualiza las tablas globales
     interface.roles_info = roles_info  # Actualiza la información de roles
     interface.table_names = [f"Tabla {i + 1}" for i in range(len(tables))]  # Inicializa los nombres de las tablas
